@@ -1,0 +1,125 @@
+<!--
+  登录 / 注册 / 忘记密码 弹窗与 JS 片段
+  接入方可将以下内容复制到自己的页面，并确保：
+  1. 页面内定义 API 基础地址（如 const API = '/api/v1'; 或你的后端前缀）
+  2. 有 el(id)、val(id)、toast(msg, type)、closeM(id) 等工具函数（或替换为你的实现）
+  3. 有全局变量 user（登录后存当前用户），以及 updateUP() 用于更新头部用户展示
+  4. 若使用 JWT 模式，登录后保存 access_token，请求时在 Header 带 Authorization: Bearer <token>
+-->
+
+<!-- 登录 -->
+<div class="modal" id="m-login">
+  <div class="modal-box">
+    <h2>登录</h2>
+    <div class="form-g"><label>用户名</label><input id="l-user" placeholder="用户名"></div>
+    <div class="form-g"><label>密码</label><input id="l-pass" type="password" placeholder="密码" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn-p" onclick="doLogin()">登录</button>
+    <p><a href="#" onclick="showForgotPassword()">忘记密码？</a></p>
+    <p>没有账号？<a href="#" onclick="showReg()">注册</a></p>
+    <button onclick="closeM('m-login')">关闭</button>
+  </div>
+</div>
+
+<!-- 注册 -->
+<div class="modal" id="m-reg">
+  <div class="modal-box">
+    <h2>注册</h2>
+    <div class="form-g"><label>用户名 *</label><input id="r-user" placeholder="用户名"></div>
+    <div class="form-g"><label>邮箱 *</label><input id="r-email" type="email" placeholder="email@example.com"></div>
+    <div class="form-g"><label>密码 *</label><input id="r-pass" type="password" placeholder="至少6位"></div>
+    <div class="form-g"><label>昵称</label><input id="r-nick" placeholder="显示名称"></div>
+    <div class="form-g"><label>性别</label><select id="r-gender"><option value="male">男</option><option value="female">女</option><option value="other">其他</option></select></div>
+    <button class="btn-p" onclick="doReg()">注册</button>
+    <p>已有账号？<a href="#" onclick="showLogin()">登录</a></p>
+    <button onclick="closeM('m-reg')">关闭</button>
+  </div>
+</div>
+
+<!-- 忘记密码 -->
+<div class="modal" id="m-forgot">
+  <div class="modal-box">
+    <h2>忘记密码</h2>
+    <p>输入注册邮箱，将收到重置邮件</p>
+    <div class="form-g"><label>邮箱</label><input id="fg-email" type="email" placeholder="注册邮箱"></div>
+    <button class="btn-p" onclick="doForgotPassword()">发送重置邮件</button>
+    <div id="fg-status"></div>
+    <p><a href="#" onclick="closeM('m-forgot');showLogin()">返回登录</a></p>
+    <button onclick="closeM('m-forgot')">关闭</button>
+  </div>
+</div>
+
+<script>
+// 工具：按 id 取元素/取值（接入方按自己项目替换）
+function el(id){ return document.getElementById(id); }
+function val(id){ const e=el(id); return e?e.value.trim():''; }
+
+// 弹窗切换
+function showLogin(){ document.querySelectorAll('.modal').forEach(m=>m.classList.remove('open')); el('m-login').classList.add('open'); }
+function showReg(){ document.querySelectorAll('.modal').forEach(m=>m.classList.remove('open')); el('m-reg').classList.add('open'); }
+function closeM(id){ el(id).classList.remove('open'); }
+function showForgotPassword(){ closeM('m-login'); el('fg-status').textContent=''; el('fg-email').value=''; el('m-forgot').classList.add('open'); }
+
+// 登录：POST /api/v1/users/login
+async function doLogin(){
+  const u=val('l-user'), p=val('l-pass');
+  if(!u||!p){ alert('请填写用户名和密码'); return; }
+  try {
+    const r = await fetch(`${API}/users/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username:u, password:p }) });
+    const d = await r.json();
+    if(!r.ok){ alert(d.detail||'登录失败'); return; }
+    window.user = d;
+    localStorage.setItem('user', JSON.stringify(d));
+    if(d.access_token) localStorage.setItem('access_token', d.access_token); // JWT 模式
+    if(typeof updateUP==='function') updateUP();
+    closeM('m-login');
+  } catch(e){ alert('网络错误'); }
+}
+
+// 注册：POST /api/v1/users/register
+async function doReg(){
+  const d = { username:val('r-user'), email:val('r-email'), password:val('r-pass'), nickname:val('r-nick'), gender:val('r-gender')||'other' };
+  if(!d.username||!d.email||!d.password){ alert('请填写必填项'); return; }
+  try {
+    const r = await fetch(`${API}/users/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(d) });
+    const res = await r.json();
+    if(!r.ok){ alert(res.detail||'注册失败'); return; }
+    closeM('m-reg'); showLogin();
+  } catch(e){ alert('网络错误'); }
+}
+
+function doLogout(){
+  window.user = null;
+  localStorage.removeItem('user');
+  localStorage.removeItem('access_token');
+  if(typeof updateUP==='function') updateUP();
+}
+
+// 忘记密码：POST /api/v1/users/forgot-password
+async function doForgotPassword(){
+  const email = val('fg-email');
+  const status = el('fg-status');
+  if(!email){ status.textContent='请输入邮箱'; return; }
+  status.textContent = '发送中...';
+  try {
+    const r = await fetch(`${API}/users/forgot-password`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email }) });
+    const d = await r.json();
+    status.textContent = r.ok ? '重置邮件已发送，请查收' : (d.detail||'发送失败');
+  } catch(e){ status.textContent = '网络错误'; }
+}
+
+// 重置密码页：从邮件链接进入 #/reset-password/:token，先 GET /api/v1/users/check-reset-token/:token 再展示表单
+// 提交：POST /api/v1/users/reset-password  body: { token, new_password }
+async function doResetPassword(token){
+  const p1 = el('rp-pass').value, p2 = el('rp-pass2').value;
+  const status = el('rp-status');
+  if(!p1||p1.length<6){ status.textContent='密码至少6位'; return; }
+  if(p1!==p2){ status.textContent='两次密码不一致'; return; }
+  status.textContent = '重置中...';
+  try {
+    const r = await fetch(`${API}/users/reset-password`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ token, new_password: p1 }) });
+    const d = await r.json();
+    status.textContent = (r.ok&&d.ok) ? '密码已重置，请登录' : (d.detail||'重置失败');
+    if(r.ok&&d.ok) setTimeout(()=>{ showLogin(); }, 1500);
+  } catch(e){ status.textContent = '网络错误'; }
+}
+</script>

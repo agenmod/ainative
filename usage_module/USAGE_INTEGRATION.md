@@ -38,7 +38,7 @@
 
 | 变量 | 必选 | 说明 |
 |------|------|------|
-| USAGE_DATABASE_URL | 是 | PostgreSQL 连接串，与主项目同库则填同一连接串 |
+| USAGE_DATABASE_URL | 是 | PostgreSQL 连接串（与接入应用共用同一数据库时填相同连接串） |
 | USAGE_DEFAULT_TOKEN_LIMIT | 否 | 默认每用户 token 额度，默认 500000 |
 | USAGE_ENABLE_USAGE_RECORDS | 否 | 是否写入用量明细表（计费/对账），默认 false |
 
@@ -106,7 +106,7 @@ app.dependency_overrides[usage_deps.get_current_user_id] = get_current_user_id_f
 ### 8.1 user_id 从哪来
 
 - **按登录用户计费**：从 JWT / session 取当前用户 ID。
-- **按「使用该 AI 的拥有者」计费**：例如 AI 社区中，从 `ai_character.owner_user_id` 或 `resolve_brain_config(..., owner_user=...).get("user_id")` 取得。
+- **按资源拥有者计费**：例如多租户场景下，从业务模型中的 `owner_user_id` 或配置解析出的 `user_id` 取得。
 - **不扣费场景**：系统内部任务、后台脚本、或使用「自定义 API / 自带 key」时，可不传 `user_id` 或不在该分支调用 `record_usage`。
 
 ### 8.2 调用前：check_quota
@@ -183,9 +183,3 @@ def call_llm_with_quota(messages, user_id: UUID, db: Session, model_id: str = No
 - `POST /api/v1/admin/usage/users/{user_id}/reset-used` — 重置该用户已用量为 0  
 
 建议在这些路由上增加 `Depends(require_admin)` 或等价鉴权。
-
----
-
-## 11. 与主项目关系说明
-
-本模块为独立交付物。当前提供该模块的主项目（AI 社区）**仍使用原有** `users` 表与 `ai_service` 内 `_check_platform_quota` / `_record_user_platform_usage` 逻辑，**未改为引用本模块**，因此不会破坏现有行为。接入方复制本目录到自己的项目后，按本文档接入即可使自己的项目具备「每用户大模型用量计费 / 限免」能力。

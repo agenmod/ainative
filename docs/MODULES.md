@@ -1,6 +1,6 @@
 # 可复用模块清单
 
-本仓库提供可单独复制到任意 FastAPI 项目的**并行摘录包**。各目录自成体系：依赖说明、SQL 迁移、[`env.example`](../auth_module/env.example)（占位值）与接入文档。
+本仓库提供可单独复制到任意 FastAPI 项目的**独立模块**。各目录自成体系：依赖说明、SQL 迁移、[`env.example`](../auth_module/env.example)（占位值）与接入文档。
 
 ## 本仓库的定位
 

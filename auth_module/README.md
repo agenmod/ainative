@@ -44,6 +44,6 @@ app.include_router(auth_router, prefix="/api/v1/users", tags=["auth"])
 
 详细接入步骤、双模式说明（简单模式 vs JWT 模式）见 **AUTH_INTEGRATION.md**。
 
-## 与宿主项目的关系
+## 使用方式
 
-本目录为**独立交付物**：可复制到任意 FastAPI 仓库，按 AUTH_INTEGRATION.md 挂载路由与数据库。是否与宿主项目已有用户系统并存，由接入方自行决定。
+将 `auth_module` 目录复制到你的 FastAPI 项目根目录（或 Python 路径可导入的位置），按 **AUTH_INTEGRATION.md** 安装依赖、建表并挂载路由。

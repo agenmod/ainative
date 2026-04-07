@@ -11,7 +11,7 @@ from usage.database import get_db as _get_db
 def get_db() -> Generator[Session, None, None]:
     """
     获取数据库会话。默认使用本模块 database 的 SessionLocal（需配置 USAGE_DATABASE_URL）。
-    接入方若使用同一数据库，设置 USAGE_DATABASE_URL 与主项目一致即可；
+    接入方若使用同一数据库，设置 USAGE_DATABASE_URL 为相同连接串即可；
     也可通过 app.dependency_overrides[usage.deps.get_db] = your_get_db 替换。
     """
     yield from _get_db()

@@ -20,7 +20,7 @@ if settings.DATABASE_URL:
 
 
 def get_db():
-    """依赖注入：获取 DB 会话。需设置 USAGE_DATABASE_URL（与主项目同库则填同一连接串）；或由接入方 dependency_overrides 替换。"""
+    """依赖注入：获取 DB 会话。需设置 USAGE_DATABASE_URL；或由接入方 dependency_overrides 替换。"""
     if SessionLocal is None:
         raise RuntimeError(
             "usage_module: USAGE_DATABASE_URL not set. Set it to your DB URL or override usage.deps.get_db with your get_db."

@@ -17,7 +17,7 @@
 - PostgreSQL（本模块表 `user_llm_usage`、可选 `usage_records`）
 - FastAPI、SQLAlchemy、pydantic-settings
 
-安装：`pip install -r requirements.txt`（若主项目已有 FastAPI/SQLAlchemy，可只补缺）
+安装：`pip install -r requirements.txt`（若你的环境已安装 FastAPI/SQLAlchemy，可只补缺）
 
 配置模板（占位值，可复制为 `.env`）：[`env.example`](env.example)。最小运行示例：[`examples/minimal_app.py`](examples/minimal_app.py)。
 
@@ -25,7 +25,7 @@
 
 | 变量 | 必选 | 说明 |
 |------|------|------|
-| USAGE_DATABASE_URL | 是 | PostgreSQL 连接串（与主项目同库则填同一连接串） |
+| USAGE_DATABASE_URL | 是 | PostgreSQL 连接串（与接入应用使用同一数据库时填相同连接串） |
 | USAGE_DEFAULT_TOKEN_LIMIT | 否 | 默认每用户 token 额度，默认 500000 |
 | USAGE_ENABLE_USAGE_RECORDS | 否 | 是否写入用量明细表，默认 false |
 | USAGE_TABLE_USER_LLM_USAGE | 否 | 表名，默认 user_llm_usage |
@@ -34,7 +34,7 @@
 ## 快速开始
 
 1. 在接入方数据库中执行 `migrations_or_sql/usage_tables.sql`。
-2. 设置 `USAGE_DATABASE_URL`（与主项目同库即可）。
+2. 设置 `USAGE_DATABASE_URL`（指向你的 PostgreSQL）。
 3. 挂载路由并注入鉴权：
 
 ```python
@@ -50,6 +50,6 @@ app.include_router(usage_router, prefix="/api/v1", tags=["usage"])
 
 详细步骤、代码示例与前端展示见 **USAGE_INTEGRATION.md**。
 
-## 与宿主项目的关系
+## 使用方式
 
-本目录为**独立交付物**：可复制到任意 FastAPI 仓库，在 LLM 调用前后接入 `check_quota` / `record_usage`。是否与宿主项目已有计费字段并存，由接入方自行决定；详见 USAGE_INTEGRATION.md。
+将 `usage_module` 目录复制到你的 FastAPI 项目，在 LLM 调用链中接入 `check_quota` / `record_usage`，详见 **USAGE_INTEGRATION.md**。

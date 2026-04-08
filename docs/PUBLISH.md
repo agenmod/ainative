@@ -1,32 +1,23 @@
-# 将本仓库推送到 GitHub（维护者：agenmod）
+# 推送与远程仓库
 
-本地若已登录其他 GitHub 账号，无法用 `gh repo create agenmod/agenmod` 代建。任选其一：
+默认远程为 **`Chiody/ainative`**（与当前常用 GitHub 账号一致）。若你使用其他账号或组织，请替换下面的 owner/repo。
 
-## 方式 A：使用 GitHub CLI 切换为 agenmod
-
-```bash
-gh auth login -h github.com
-# 浏览器或 Token 登录 **agenmod** 账号后：
-cd /path/to/agenmod
-gh repo create agenmod/agenmod --public --source=. --remote=origin --push \
-  --description "Reusable FastAPI modules: auth, LLM usage quota."
-```
-
-## 方式 B：网页创建空仓库后推送
-
-1. 用 **agenmod** 登录 GitHub → New repository → 仓库名 `agenmod` → Public → 不要勾选 Initialize with README。
-2. 本地执行：
+## 使用 GitHub CLI 创建并推送
 
 ```bash
-cd /path/to/agenmod
-git remote add origin https://github.com/agenmod/agenmod.git
-git branch -M main
-git push -u origin main
+cd /path/to/ainative
+gh repo create Chiody/ainative --public --source=. --remote=origin --push \
+  --description "Ainative: reusable FastAPI modules for AI-native apps (auth, LLM quota)."
 ```
 
-（若使用 SSH：`git@github.com:agenmod/agenmod.git`）
+若本地已有 `origin`，可先：`git remote remove origin`。
+
+## 网页创建空仓库后推送
+
+1. 在 GitHub 上新建仓库 **`ainative`**（Public，不要勾选 README）。
+2. `git remote add origin https://github.com/<你的用户名>/ainative.git`
+3. `git branch -M main && git push -u origin main`
 
 ## 安全
 
-- **切勿**将 Personal Access Token 写入仓库、Issue 或聊天。
-- 若 Token 曾泄露，请在 GitHub → Settings → Developer settings → Personal access tokens 中**立即撤销**并重新生成。
+勿将 Personal Access Token 写入仓库；勿提交 `.env`。

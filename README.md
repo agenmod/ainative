@@ -22,7 +22,7 @@
 ## 快速开始
 
 ```bash
-git clone https://github.com/Chiody/ainative.git
+git clone https://github.com/agenmod/ainative.git
 cd ainative/auth_module   # 或 usage_module
 cp env.example .env       # 本地填写真实值，勿提交 .env
 pip install -r requirements.txt
